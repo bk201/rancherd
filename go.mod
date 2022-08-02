@@ -23,7 +23,7 @@ replace (
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.21.0
 	k8s.io/kubectl => k8s.io/kubectl v0.21.0
 	k8s.io/kubelet => k8s.io/kubelet v0.21.0
-	k8s.io/kubernetes => k8s.io/kubernetes v1.21.0
+	k8s.io/kubernetes => k8s.io/kubernetes v1.21.12
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.21.0
 	k8s.io/metrics => k8s.io/metrics v0.21.0
 	k8s.io/mount-utils => k8s.io/mount-utils v0.21.0
@@ -43,11 +43,12 @@ require (
 	github.com/rancher/wrangler-cli v0.0.0-20210217230406-95cfa275f52f
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
+	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/api v0.21.3
 	k8s.io/apimachinery v0.21.3
 	k8s.io/client-go v12.0.0+incompatible
+	k8s.io/kubernetes v1.21.12 // indirect
 	sigs.k8s.io/yaml v1.2.0
 )
