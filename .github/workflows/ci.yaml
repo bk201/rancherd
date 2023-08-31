@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      - harvester-dev
+      - dev-*
 
 jobs:
   build-and-test:
