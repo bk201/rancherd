@@ -25,11 +25,21 @@ MK_DOCKER_PROGRESS ?= plain
 export MK_DOCKER_PROGRESS
 
 
-DOCKER_BUILD = docker build \
+DOCKER_BUILD = docker buildx build \
     --progress=$(MK_DOCKER_PROGRESS) \
     --build-arg MK_REPO_ID \
     --build-arg MK_HOST_ARCH \
     -f $(ROOT)/Dockerfile $(ROOT)
+
+# In CI, layer-cache each docker build target (build/validate/test) via the
+# GitHub Actions cache backend. Scoped per-target so the three builds don't
+# clobber each other's cache. No-op locally since Docker already keeps its
+# own layer cache and there's no GHA cache to talk to.
+ifdef CI
+DOCKER_CACHE_FLAGS = --cache-from=type=gha,scope=rancherd-$(1) --cache-to=type=gha,mode=max,scope=rancherd-$(1)
+else
+DOCKER_CACHE_FLAGS =
+endif
 
 # ---- Pre-generate version env for container builds (no .git needed inside Docker) ----
 # Also handles git worktree checkouts where .git is a pointer file to an external directory.
@@ -40,6 +50,7 @@ gen-version-env:
 build: gen-version-env | $(ROOT)/bin
 	$(BANNER)
 	$(DOCKER_BUILD) --target build-output \
+	    $(call DOCKER_CACHE_FLAGS,build) \
 	    --output type=local,dest=$(ROOT)
 
 $(ROOT)/bin:
@@ -48,12 +59,12 @@ $(ROOT)/bin:
 # ---- validate ----
 validate: gen-version-env
 	$(BANNER)
-	$(DOCKER_BUILD) --target validate
+	$(DOCKER_BUILD) --target validate $(call DOCKER_CACHE_FLAGS,validate)
 
 # ---- test ----
 test: gen-version-env
 	$(BANNER)
-	$(DOCKER_BUILD) --target test
+	$(DOCKER_BUILD) --target test $(call DOCKER_CACHE_FLAGS,test)
 
 # ---- package (host-side: copies built binaries to dist/artifacts) ----
 package: build

@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - harvester-dev
+    - dev
     tags:
     - v*
   pull_request:
@@ -14,9 +15,24 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca # v3.9.0
+
+    - name: Inject Go caches into BuildKit
+      uses: reproducible-containers/buildkit-cache-dance@5422eac04292c961a382e0f584ea0f03ad9da723 # v3.4.0
+      with:
+        cache-map: |
+          {
+            "go-mod-cache": "/go/pkg/mod",
+            "go-build-cache": "/go/src/github.com/harvester/rancherd/.cache/go-build"
+          }
+
     # Build binaries and SHA files
+    # MK_REPO_ID is pinned so the go-mod/go-build cache mount ids are stable
+    # across ephemeral runners (the Makefile default derives it from
+    # /etc/machine-id, which varies per runner and would break cache reuse).
     - name: Run make ci
-      run: make ci
+      run: make ci MK_REPO_ID=gha-cache
 
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
