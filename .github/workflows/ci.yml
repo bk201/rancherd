@@ -1,0 +1,26 @@
+name: Gateway smoke
+on: workflow_dispatch
+
+jobs:
+  smoke:
+    runs-on: harvester-runners
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo install -m 0644 tls.crt \
+            /usr/local/share/ca-certificates/tls.crt
+          sudo update-ca-certificates
+          curl -fsS -o /dev/null -w '%{http_code}\n' \
+            https://10.0.21.1:8443/healthz
+
+
+      - name: Run smoke test
+        env:
+          GATEWAY_SMOKE: "1"
+          GATEWAY_URL: https://10.0.21.1:8443
+          GATEWAY_IMAGE: default/ubuntu
+          GATEWAY_NETWORK: default/hvst-dev-vlan
+        run: bash scripts/smoke.sh
